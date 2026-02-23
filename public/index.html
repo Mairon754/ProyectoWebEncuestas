@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proyecto Web - Encuestas Interactivas</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#5B2EFF">
+
+  <!-- Bootstrap (CDN). La app igual funciona offline con styles.css; Bootstrap es un plus. -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body class="bg-app">
+
+  <header class="topbar">
+    <div class="container d-flex align-items-center justify-content-between py-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="logo-badge">PW</div>
+        <div class="lh-1">
+          <div class="fw-bold text-white">Proyecto Web</div>
+          <small class="text-white-50">Encuestas tipo Kahoot (offline-first)</small>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <span id="net-badge" class="badge rounded-pill badge-net">●</span>
+        <button id="btn-sync" class="btn btn-glow btn-sm">Sincronizar</button>
+        <button id="btn-salir" class="btn btn-outline-light btn-sm d-none">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container pb-5">
+
+    <!-- Pantalla: Bienvenida -->
+    <section id="screen-welcome" class="screen active">
+      <div class="hero card-glass p-4 p-md-5 mt-4">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <h1 class="display-6 fw-bold text-white mb-2">Responde y avanza 🧠⚡</h1>
+            <p class="text-white-75 mb-4">
+              Una encuesta interactiva, rápida y amable. Si no hay internet, no pasa nada:
+              guardamos todo local y lo subimos cuando vuelva la conexión.
+            </p>
+
+            <div class="d-flex flex-wrap gap-2">
+              <button id="btn-participante" class="btn btn-glow btn-lg">Soy Participante</button>
+              <a href="./admin.html" class="btn btn-outline-light btn-lg">Soy Administrador</a>
+            </div>
+
+            <div class="mt-4 text-white-75 small">
+              <div>✔ Offline-first (IndexedDB)</div>
+              <div>✔ Sincronización automática por lotes</div>
+              <div>✔ Exportación del dataset (Administrador)</div>
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="game-card p-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="pill">Modo Kahoot suave</span>
+                <span class="pill">📱 PWA</span>
+              </div>
+              <div class="mini-quiz">
+                <div class="mini-q">¿Listo para comenzar?</div>
+                <div class="mini-opts">
+                  <div class="opt opt-a">Sí</div>
+                  <div class="opt opt-b">Claro</div>
+                  <div class="opt opt-c">Vamos</div>
+                  <div class="opt opt-d">De una</div>
+                </div>
+              </div>
+              <div class="mt-3 text-white-50 small">
+                Tip: si pierdes señal, sigue respondiendo igual.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla: Auth Participante -->
+    <section id="screen-auth" class="screen">
+      <div class="row justify-content-center">
+        <div class="col-lg-7">
+          <div class="card-glass p-4 mt-4">
+            <h2 class="h4 text-white fw-bold mb-3">Ingresar como participante</h2>
+            <p class="text-white-75 mb-4">Usa tu <b>código</b> y <b>PIN</b>. Si no tienes, puedes registrarte aquí mismo.</p>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-white-75">Código</label>
+                <input id="p-code" class="form-control form-control-lg" maxlength="20" placeholder="Ej: EST-001">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-white-75">PIN</label>
+                <input id="p-pin" type="password" class="form-control form-control-lg" maxlength="32" placeholder="••••••">
+              </div>
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                  <button id="btn-p-login" class="btn btn-glow">Iniciar sesión</button>
+                  <button id="btn-p-register" class="btn btn-outline-light">Registrarme</button>
+                  <button id="btn-auth-back" class="btn btn-link text-white-75">Volver</button>
+                </div>
+                <div id="auth-msg" class="mt-3 small"></div>
+              </div>
+            </div>
+
+            <hr class="border-white-10 my-4" />
+
+            <div class="text-white-75 small">
+              Tus respuestas se guardan de forma segura. No guardes tu PIN donde otros lo vean.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla: Consentimiento -->
+    <section id="screen-consent" class="screen">
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div class="card-glass p-4 mt-4">
+            <h2 class="h4 text-white fw-bold mb-3">Consentimiento informado</h2>
+            <p class="text-white-75">
+              Esta encuesta recolecta respuestas con fines académicos. La participación es voluntaria.
+              Se usa un <b>código</b> en lugar de nombres para proteger la privacidad.
+            </p>
+
+            <div class="consent-box">
+              <ul class="text-white-75 mb-0">
+                <li>Se registran respuestas y tiempos de respuesta.</li>
+                <li>No se publican datos personales identificables.</li>
+                <li>Puedes salir en cualquier momento.</li>
+              </ul>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <button id="btn-consent-accept" class="btn btn-glow btn-lg">Acepto</button>
+              <button id="btn-consent-decline" class="btn btn-outline-light btn-lg">No acepto</button>
+            </div>
+
+            <div id="consent-msg" class="mt-3 small"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla: Lista encuestas -->
+    <section id="screen-surveys" class="screen">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="card-glass p-4 mt-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div>
+                <h2 class="h4 text-white fw-bold mb-1">Selecciona una encuesta</h2>
+                <div class="text-white-75 small">Tu progreso se guarda automáticamente.</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span id="pending-badge" class="badge rounded-pill bg-dark">Pendientes: 0</span>
+              </div>
+            </div>
+
+            <div id="survey-list" class="survey-grid mt-4"></div>
+
+            <div id="surveys-msg" class="mt-3 small"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla: Quiz -->
+    <section id="screen-quiz" class="screen">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="card-glass p-4 mt-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="text-white-75 small" id="quiz-title">Encuesta</div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="pill" id="quiz-points">Puntos: 0</span>
+                <span class="pill" id="quiz-progress">0/0</span>
+              </div>
+            </div>
+
+            <div class="progress mt-3" style="height: 10px;">
+              <div id="bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+            </div>
+
+            <div class="question-card mt-4">
+              <div id="q-text" class="q-text"></div>
+              <div id="q-help" class="q-help"></div>
+              <div id="opts" class="opts mt-3"></div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <button id="btn-quit-quiz" class="btn btn-outline-light">Salir de la encuesta</button>
+              <div class="text-white-50 small" id="quiz-status"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla: Final -->
+    <section id="screen-finish" class="screen">
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div class="card-glass p-4 mt-4 text-center">
+            <div class="badge-big">🏁</div>
+            <h2 class="h3 text-white fw-bold mt-3">¡Listo! Respuestas guardadas.</h2>
+            <p class="text-white-75">Puntaje simbólico (por completar): <b id="finish-points">0</b></p>
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+              <button id="btn-finish-back" class="btn btn-glow">Volver a encuestas</button>
+              <button id="btn-finish-sync" class="btn btn-outline-light">Sincronizar ahora</button>
+            </div>
+
+            <div class="mt-4 small text-white-50">
+              <div id="finish-pending">Pendientes: 0</div>
+              <div>Si estás sin internet, se sincroniza después automáticamente.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="py-4">
+    <div class="container text-center text-white-50 small">
+      Proyecto académico • Offline-first • WAMP + MySQL
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try { await navigator.serviceWorker.register('./sw.js'); } catch (e) {}
+      });
+    }
+  </script>
+</body>
+</html>

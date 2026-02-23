@@ -1,0 +1,15 @@
+@startuml
+title Contexto - Proyecto Web (Offline-first)
+actor "Participante" as P
+actor "Administrador" as A
+rectangle "PWA (Frontend)\n/public" as PWA
+rectangle "API PHP\n/backend/api" as API
+database "MySQL\nproyecto_web_db" as DB
+database "IndexedDB\n(local)" as IDB
+P --> PWA : Responde encuesta
+PWA --> IDB : Guarda respuestas (offline)
+PWA --> API : Sincroniza lote (online)
+API --> DB : Almacena respuestas
+A --> PWA : Administra encuestas (admin.html)
+PWA --> API : Crea encuestas / Exporta CSV
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+title ERD (MySQL) - Proyecto Web
+entity admin_users { * id : PK  email : unique  password_hash }
+entity participants { * id : PK  code : unique  pin_hash }
+entity consentimientos { * id : PK  participant_id : FK unique  accepted }
+entity surveys { * id : PK  title }
+entity questions { * id : PK  survey_id : FK  text  qtype }
+entity options { * id : PK  question_id : FK  label }
+entity sessions { * id : PK  session_uuid : unique  participant_id : FK  survey_id : FK }
+entity responses { * uuid : PK  session_id : FK  survey_id : FK  question_id : FK  option_id  text_value  number_value }
+participants ||--|| consentimientos
+surveys ||--o{ questions
+questions ||--o{ options
+participants ||--o{ sessions
+surveys ||--o{ sessions
+sessions ||--o{ responses
+@enduml
