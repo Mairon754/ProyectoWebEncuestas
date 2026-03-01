@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "proyecto_web_cache_v1";
+const CACHE_NAME = "proyecto_web_cache_v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -11,6 +11,7 @@ const ASSETS = [
   "./assets/js/api.js",
   "./assets/js/db.js",
   "./assets/img/icon-192.png",
+  "./assets/js/vendor/qrcode.min.js",
   "./assets/img/icon-512.png",
 ];
 

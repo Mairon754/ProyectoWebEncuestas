@@ -28,4 +28,8 @@ export const API = {
   adminCreateSurvey: (token, title, description) => http("/admin/surveys_create.php", { method: "POST", token, body: { title, description } }),
   adminAddQuestion: (token, survey_id, text, qtype, options) => http("/admin/question_add.php", { method: "POST", token, body: { survey_id, text, qtype, options } }),
   adminExportUrl: (token) => `${API_BASE}/admin/export_csv.php?token=${encodeURIComponent(token)}`,
+  adminGenerateParticipants: (token, count, prefix) =>
+  http("/admin/participants_generate.php", { method: "POST", token, body: { count, prefix } }),
+  adminListParticipants: (token) =>
+  http("/admin/participants_list.php", { method: "GET", token }),
 };

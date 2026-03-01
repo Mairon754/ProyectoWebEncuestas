@@ -45,7 +45,7 @@ export const DB = {
     }));
   },
   async enqueue(item) {
-    item.synced = false;
+    item.synced = 0; // 0 = pendiente, 1 = sincronizado
     item.created_at = item.created_at || Date.now();
     return tx('queue', 'readwrite', (s) => s.put(item));
   },
@@ -53,7 +53,7 @@ export const DB = {
     return tx('queue', 'readonly', (s) => new Promise((res) => {
       const idx = s.index('by_synced');
       const out = [];
-      const cursorReq = idx.openCursor(IDBKeyRange.only(false));
+      const cursorReq = idx.openCursor(IDBKeyRange.only(0));
       cursorReq.onsuccess = () => {
         const cur = cursorReq.result;
         if (!cur || out.length >= limit) return res(out);
@@ -71,7 +71,7 @@ export const DB = {
         const r = s.get(u);
         r.onsuccess = () => {
           const v = r.result;
-          if (v) { v.synced = true; s.put(v); }
+          if (v) { v.synced = 1; s.put(v); }
           done++;
           if (done === uuids.length) res(done);
         };
@@ -82,7 +82,7 @@ export const DB = {
   async countPending() {
     return tx('queue', 'readonly', (s) => new Promise((res) => {
       const idx = s.index('by_synced');
-      const req = idx.count(IDBKeyRange.only(false));
+      const req = idx.count(IDBKeyRange.only(0));
       req.onsuccess = () => res(req.result || 0);
       req.onerror = () => res(0);
     }));
@@ -96,7 +96,7 @@ export const DB = {
         const cur = cursorReq.result;
         if (!cur) return res(deleted);
         const v = cur.value;
-        if (v.synced === true && (v.created_at || 0) < cutoff) {
+        if (v.synced === 1 && (v.created_at || 0) < cutoff) {
           s.delete(cur.key);
           deleted++;
         }

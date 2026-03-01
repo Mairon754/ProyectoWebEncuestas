@@ -103,7 +103,9 @@
                 <div class="d-flex flex-wrap gap-2 mt-2">
                   <button id="btn-p-login" class="btn btn-glow">Iniciar sesión</button>
                   <button id="btn-p-register" class="btn btn-outline-light">Registrarme</button>
+                  <button id="btn-scan-qr" class="btn btn-outline-light">Escanear QR</button>
                   <button id="btn-auth-back" class="btn btn-link text-white-75">Volver</button>
+                  
                 </div>
                 <div id="auth-msg" class="mt-3 small"></div>
               </div>
@@ -225,6 +227,18 @@
         </div>
       </div>
     </section>
+
+    <div id="qr-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999;">
+  <div style="max-width:520px; margin:40px auto; background:rgba(10,14,30,.92); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="text-white fw-bold">Escanear QR</div>
+      <button id="btn-close-qr" class="btn btn-sm btn-outline-light">Cerrar</button>
+    </div>
+    <div class="text-white-75 small mb-2">Apunta la cámara al QR (código + PIN).</div>
+    <video id="qr-video" style="width:100%; border-radius:14px; border:1px solid rgba(255,255,255,.12);" playsinline></video>
+    <div id="qr-scan-msg" class="mt-2 small text-white-75"></div>
+  </div>
+</div>
 
   </main>
 

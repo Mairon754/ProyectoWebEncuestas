@@ -16,10 +16,25 @@ function read_json(): array {
   return is_array($data) ? $data : [];
 }
 function bearer_token(): ?string {
-  $headers = function_exists('getallheaders') ? getallheaders() : [];
-  $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+  // 1) La forma más confiable en Apache/WAMP:
+  $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+
+  // 2) A veces llega aquí:
+  if (!$auth) {
+    $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+  }
+
+  // 3) Fallback:
+  if (!$auth) {
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+  }
+
   if (!$auth) return null;
-  if (preg_match('/Bearer\s+(.*)$/i', $auth, $m)) return trim($m[1]);
+
+  if (preg_match('/Bearer\s+(.+)$/i', $auth, $m)) {
+    return trim($m[1]);
+  }
   return null;
 }
 function now_utc(): string { return gmdate('Y-m-d H:i:s'); }

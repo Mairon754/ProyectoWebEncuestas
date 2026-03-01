@@ -15,5 +15,8 @@ $active = 1;
 $created = now_utc();
 $stmt = $conn->prepare("INSERT INTO surveys(title, description, is_active, created_at) VALUES(?,?,?,?)");
 $stmt->bind_param("ssis", $title, $description, $active, $created);
-$stmt->execute();
+$ok = $stmt->execute();
+if (!$ok) {
+  json_out(['ok'=>false,'message'=>'No se pudo crear encuesta: '.$conn->error], 500);
+}
 json_out(['ok'=>true,'id'=>$conn->insert_id]);

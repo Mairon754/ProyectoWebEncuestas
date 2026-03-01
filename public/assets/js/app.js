@@ -258,3 +258,87 @@ async function syncNow(showAlerts = false) {
 }
 
 setInterval(() => { if (navigator.onLine && token) syncNow(false); }, 30000);
+// ====== ESCANEO QR (offline) ======
+const qrModal = document.getElementById("qr-modal");
+const qrVideo = document.getElementById("qr-video");
+const qrMsg = document.getElementById("qr-scan-msg");
+let qrStream = null;
+let qrLoop = null;
+
+function openQRModal(){
+  qrModal.style.display = "block";
+  qrMsg.textContent = "";
+}
+function closeQRModal(){
+  qrModal.style.display = "none";
+  stopQRScanner();
+}
+
+async function startQRScanner(){
+  // BarcodeDetector funciona en Chrome/Edge (Android/PC). En otros navegadores puede no estar.
+  if (!("BarcodeDetector" in window)) {
+    qrMsg.textContent = "Tu navegador no soporta escaneo QR. Escribe código y PIN manualmente.";
+    return;
+  }
+
+  try{
+    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    qrVideo.srcObject = qrStream;
+    await qrVideo.play();
+
+    const detector = new BarcodeDetector({ formats: ["qr_code"] });
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    qrLoop = setInterval(async () => {
+      try{
+        if (qrVideo.readyState < 2) return;
+        canvas.width = qrVideo.videoWidth;
+        canvas.height = qrVideo.videoHeight;
+        ctx.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+
+        const bitmap = await createImageBitmap(canvas);
+        const codes = await detector.detect(bitmap);
+
+        if (codes && codes.length) {
+          const raw = (codes[0].rawValue || "").trim();
+
+          // Formato esperado: PW|CODIGO|PIN
+          if (raw.startsWith("PW|")) {
+            const parts = raw.split("|");
+            const code = parts[1] || "";
+            const pin  = parts[2] || "";
+
+            document.getElementById("p-code").value = code;
+            document.getElementById("p-pin").value = pin;
+
+            qrMsg.textContent = "QR leído. Código y PIN rellenados ✅";
+            setTimeout(() => closeQRModal(), 700);
+          } else {
+            qrMsg.textContent = "QR no válido. Debe iniciar con PW|";
+          }
+        }
+      } catch(e){}
+    }, 250);
+
+    qrMsg.textContent = "Escaneando…";
+  } catch(e){
+    qrMsg.textContent = "No se pudo acceder a la cámara. Permite el permiso y prueba de nuevo.";
+  }
+}
+
+function stopQRScanner(){
+  if (qrLoop) { clearInterval(qrLoop); qrLoop = null; }
+  if (qrStream) {
+    qrStream.getTracks().forEach(t => t.stop());
+    qrStream = null;
+  }
+  if (qrVideo) qrVideo.srcObject = null;
+}
+
+// Botones
+document.getElementById("btn-scan-qr")?.addEventListener("click", () => {
+  openQRModal();
+  startQRScanner();
+});
+document.getElementById("btn-close-qr")?.addEventListener("click", closeQRModal);
